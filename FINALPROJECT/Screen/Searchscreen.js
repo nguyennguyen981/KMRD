@@ -1,9 +1,12 @@
 import React,{Component} from 'react';
-import {View,ImageBackground,ActivityIndicator,Picker,TouchableOpacity,ScrollView,Image,Dimensions,FlatList,Alert} from 'react-native';
+import {View,ImageBackground,ActivityIndicator,Picker,TouchableOpacity,ScrollView,Image,Dimensions,FlatList,Alert,ToastAndroid} from 'react-native';
 import { Container, Header, Content, Thumbnail, Text, Left, Body, Right, Button,Icon,Input,Item } from 'native-base';
 import Firestore from '../Firebase/FirestoreConfig'
 import FastImage from 'react-native-fast-image'
 import Icon1 from 'react-native-vector-icons/Fontisto';
+import { connect } from 'react-redux'
+
+
 
 const { width: screenWidth } = Dimensions.get('window')
 
@@ -46,8 +49,23 @@ function GetData(SomeFunction,setLoading,searchvalue,category){
   });
 }
 
+function IsInCart(cartItems,item)
+{
+  for(let i of cartItems)
+  {
+    if(i.Id===item.Id)
+    return true;
+  }
+  return false;
+}
 
-export default class SearchHeader extends Component{
+function AddItemToCart(somefunction,item)
+{
+  somefunction(item);
+  ToastAndroid.show('Add succesful', ToastAndroid.SHORT);
+}
+
+class Searchscreen extends Component{
   constructor(props) {
   super(props);
   this.state = ({
@@ -131,14 +149,16 @@ export default class SearchHeader extends Component{
     >
     <TouchableOpacity style={{flex:16,flexDirection:'row'}} onPress={() => this.props.navigation.navigate('Product',{data:item})}>
     <FastImage source={{uri: item.ImageUrl[0],headers: { Authorization: 'someAuthToken' },
-    priority: FastImage.priority.normal,}} style={{flex:4}} resizeMode={FastImage.resizeMode.contain} />
+    priority: FastImage.priority.normal,}} style={{flex:4,marginVertical:2}} resizeMode={FastImage.resizeMode.contain} />
     <View style={{flex:12,justifyContent:'space-around'}}>
     <Text style={{textAlign:'center' }} numberOfLines={2}>{'Name: '+item.Name}</Text>
     <Text style={{textAlign:'center'}} >{'Price: '+item.Price}</Text>
     </View>
     </TouchableOpacity>
     <TouchableOpacity style={{flex:4,justifyContent:'center',alignItems:'center'}}>
-      <Icon1.Button name="shopping-basket-remove" size={30} onPress={()=>console.log('nhan duoc ')}/>
+      <Icon1.Button name="shopping-basket-remove" size={30} onPress={()=>IsInCart(this.props.cartItems,item)?
+        ToastAndroid.show('This item already in cart !', ToastAndroid.SHORT)
+        :AddItemToCart(this.props.AddItem,item)}/>
     </TouchableOpacity>
     </View>
       )}
@@ -154,6 +174,19 @@ export default class SearchHeader extends Component{
       </ImageBackground>
     );
   }
-
-
 }
+
+const mapStateToProps = (state) => {
+    return {
+        cartItems: state
+    }
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        AddItem: (product) => dispatch({ type: 'ADD_ITEM_TO_CART', payload: product })
+    }
+}
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(Searchscreen);

@@ -1,8 +1,20 @@
-import * as React from 'react';
-import { Button, View, Text,Alert } from 'react-native';
-import NumericInput from 'react-native-numeric-input'
+import React, { Component } from "react";
+import {
+    View,
+    Text,
+    StyleSheet,
+    FlatList,
+    ScrollView,
+    ImageBackground
 
-export default class Temp extends React.Component{
+} from "react-native";
+import { connect } from 'react-redux'
+import NumericInput from 'react-native-numeric-input'
+import Cartitemline from '../components/Cart/Cartitemline'
+import Total from '../components/Cart/Total'
+
+
+class Temp extends React.Component{
   constructor(props) {
   super(props);
   this.state = ({
@@ -11,18 +23,38 @@ export default class Temp extends React.Component{
   }
   render(){
     return(
-      <NumericInput
-          value={this.state.value}
-          onChange={value => this.setState({value})}
-          onLimitReached={(isMax,msg) => console.log(isMax,msg)}
-          totalWidth={100}
-          totalHeight={70}
-          iconSize={25}
-          minValue={1}
-          textColor='#B0228C'
-          iconStyle={{ color: 'white' }}
-          rightButtonBackgroundColor='#EA3788'
-          leftButtonBackgroundColor='#E56B70'/>
+      <ImageBackground
+      source={require('../src/Image/BackGround.jpg')}
+      style={{width: '100%', height: '100%',resize:'contain'}}>
+      <ScrollView>
+      {
+        this.props.cartItems.length > 0 ?
+        <FlatList
+          data={this.props.cartItems}
+          renderItem={({ item }) => <Cartitemline data={item}/>}
+          keyExtractor={item => item.id}
+        />
+        : <Text>No items in your cart</Text>
+      }
+    </ScrollView>
+    <Total/>
+    </ImageBackground>
     );
   }
 }
+
+const mapStateToProps = (state) => {
+    return {
+        cartItems: state
+    }
+}
+
+export default connect(mapStateToProps)(Temp);
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center'
+    }
+});

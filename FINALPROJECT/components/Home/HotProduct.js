@@ -1,6 +1,6 @@
 import React,{Component} from 'react'
 import Firestore from '../../Firebase/FirestoreConfig'
-import {View,ImageBackground,ActivityIndicator,Picker,TouchableOpacity,ScrollView,Dimensions,StyleSheet,Image,Toast} from 'react-native'
+import {View,ImageBackground,ActivityIndicator,Picker,TouchableOpacity,ScrollView,Dimensions,StyleSheet,Image} from 'react-native'
 import Carousel from 'react-native-snap-carousel';
 import { Container, Header, Item, Input, Icon, Text,Content} from 'native-base';
 import FastImage from 'react-native-fast-image'
@@ -52,7 +52,6 @@ export default class HotProduct extends Component{
   componentDidMount(){
     //console.log(this.props)
     GetData(this.SetHotItemData);
-
   }
 
   render(){

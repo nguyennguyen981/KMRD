@@ -1,14 +1,33 @@
 import React,{Component} from 'react';
-import {View,ImageBackground,TouchableOpacity,ScrollView,Dimensions,Text,Image} from 'react-native'
+import {View,ImageBackground,TouchableOpacity,ScrollView,Dimensions,Text,Image,ToastAndroid} from 'react-native'
 import HeaderBar from '../components/Product/HeaderBar';
 import CarasoulImage from '../components/Product/CarasoulImage';
 import {Content,Body,Right,Item} from 'native-base'
 import Icon from 'react-native-vector-icons/Fontisto';
+import { connect } from 'react-redux'
 
-export default class Productscreen extends Component{
+function IsInCart(cartItems,item)
+{
+  for(let i of cartItems)
+  {
+    if(i.Id===item.Id)
+    return true;
+  }
+  return false;
+}
+
+function Rightwaytoshowtoast(somefunction,item,sometoast)
+{
+  somefunction(item);
+  ToastAndroid.show(sometoast, ToastAndroid.SHORT)
+}
+
+class Productscreen extends Component{
   constructor(props) {
     super(props);
-    this.state={data:(this.props.navigation.getParam('data')),
+    this.state={
+      data:(this.props.navigation.getParam('data')),
+      itemcart:'',
   }
   }
 
@@ -23,7 +42,15 @@ export default class Productscreen extends Component{
       <Text style={{textAlign:'center',}}>{this.state.data.Name}</Text>
       <View style={{flex: 1, flexDirection: 'row',justifyContent:'space-around',alignItems:'center'}}>
           <Text >{'Price: '+this.state.data.Price+'$'}</Text>
-            <Icon.Button name="shopping-basket-remove" size={40} onPress={()=>console.log('nhan duoc ')}/>
+          {
+            IsInCart(this.props.cartItems,this.state.data)?
+            <Icon.Button name='shopping-basket-remove' size={40}
+            iconStyle={{marginHorizontal: 10}}
+            onPress={()=>Rightwaytoshowtoast(this.props.RemoveItem,this.state.data,'Item remove success !')}/>
+            :<Icon.Button name='shopping-basket' size={40}
+            iconStyle={{marginHorizontal: 10}}
+            onPress={()=>Rightwaytoshowtoast(this.props.AddItem,this.state.data,'Item add success !')}/>
+          }
       </View>
       <Text>{'       Mo ta:\n       '+this.state.data.Content}</Text>
       </ScrollView>
@@ -31,3 +58,19 @@ export default class Productscreen extends Component{
     );
   }
 }
+
+const mapStateToProps = (state) => {
+    return {
+        cartItems: state
+    }
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        AddItem: (product) => dispatch({ type: 'ADD_ITEM_TO_CART', payload: product }),
+        RemoveItem: (product) => dispatch({ type: 'REMOVE_ITEM_FROM_CART', payload: product })
+    }
+}
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(Productscreen);
